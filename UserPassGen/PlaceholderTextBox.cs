@@ -16,6 +16,15 @@ public class PlaceholderTextBox : TextBox
         set { placeholderText = value; Invalidate(); }
     }
 
+    protected override void OnCreateControl()
+    {
+        base.OnCreateControl();
+        if (string.IsNullOrEmpty(this.Text))
+        {
+            ShowPlaceholder();
+        }
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
@@ -34,9 +43,7 @@ public class PlaceholderTextBox : TextBox
         base.OnGotFocus(e);
         if (isPlaceholderActive)
         {
-            this.Text = "";
-            isPlaceholderActive = false;
-            this.ForeColor = Color.Black;
+            HidePlaceholder();
         }
     }
 
@@ -45,9 +52,7 @@ public class PlaceholderTextBox : TextBox
         base.OnLostFocus(e);
         if (string.IsNullOrEmpty(this.Text))
         {
-            isPlaceholderActive = true;
-            this.ForeColor = Color.Gray;
-            Invalidate();
+            ShowPlaceholder();
         }
     }
 
@@ -56,14 +61,25 @@ public class PlaceholderTextBox : TextBox
         base.OnTextChanged(e);
         if (!this.Focused && string.IsNullOrEmpty(this.Text))
         {
-            isPlaceholderActive = true;
-            this.ForeColor = Color.Gray;
-            Invalidate();
+            ShowPlaceholder();
         }
         else
         {
-            isPlaceholderActive = false;
-            this.ForeColor = Color.Black;
+            HidePlaceholder();
         }
+    }
+
+    private void ShowPlaceholder()
+    {
+        this.Text = placeholderText;
+        this.ForeColor = Color.Gray;
+        isPlaceholderActive = true;
+    }
+
+    private void HidePlaceholder()
+    {
+        this.Text = "";
+        this.ForeColor = Color.Black;
+        isPlaceholderActive = false;
     }
 }
