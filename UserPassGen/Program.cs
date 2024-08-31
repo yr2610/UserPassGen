@@ -85,3 +85,54 @@ public static class Program
         Application.Run(new PasswordForm());
     }
 }
+
+#if false
+// アドイン側でパスワードを検証し、有効期限が過ぎていないかをチェックするコード
+using ExcelDna.Integration;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+using System.Reflection;
+
+public static class AddInManager
+{
+    [ExcelFunction(Description = "Check if the password is valid")]
+    public static bool IsPasswordValid(string password)
+    {
+        // Excelからログインユーザー名を取得
+        string userName = Environment.UserName;
+
+        // Visual Studioのプロジェクト名を取得
+        string projectName = Assembly.GetExecutingAssembly().GetName().Name;
+
+        // パスワードから有効期限を抽出
+        string hexDays = password.Substring(0, 4);
+        int daysSinceBase;
+        if (!int.TryParse(hexDays, System.Globalization.NumberStyles.HexNumber, null, out daysSinceBase))
+        {
+            return false; // 有効期限の形式が不正
+        }
+
+        DateTime baseDate = new DateTime(1970, 1, 1);
+        DateTime expirationDate = baseDate.AddDays(daysSinceBase);
+
+        // 有効期限が過ぎていないかチェック
+        if (DateTime.Now > expirationDate)
+        {
+            return false; // 有効期限切れ
+        }
+
+        // プロジェクト名、ユーザー名と有効期限を連結
+        string input = projectName + userName + hexDays;
+
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+            string hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+            string expectedPassword = hexDays + hashString.Substring(0, 8);
+
+            return password == expectedPassword;
+        }
+    }
+}
+#endif
