@@ -25,19 +25,6 @@ public class PlaceholderTextBox : TextBox
         }
     }
 
-    protected override void OnPaint(PaintEventArgs e)
-    {
-        base.OnPaint(e);
-
-        if (isPlaceholderActive && !string.IsNullOrEmpty(this.PlaceholderText))
-        {
-            using (Brush brush = new SolidBrush(Color.Gray))
-            {
-                e.Graphics.DrawString(this.PlaceholderText, this.Font, brush, new PointF(0, 0));
-            }
-        }
-    }
-
     protected override void OnGotFocus(EventArgs e)
     {
         base.OnGotFocus(e);
@@ -56,6 +43,20 @@ public class PlaceholderTextBox : TextBox
         }
     }
 
+    private void ShowPlaceholder()
+    {
+        isPlaceholderActive = true;
+        this.Text = placeholderText;
+        this.ForeColor = Color.Gray;
+    }
+
+    private void HidePlaceholder()
+    {
+        isPlaceholderActive = false;
+        this.Text = "";
+        this.ForeColor = Color.Black;
+    }
+
     protected override void OnTextChanged(EventArgs e)
     {
         base.OnTextChanged(e);
@@ -63,23 +64,10 @@ public class PlaceholderTextBox : TextBox
         {
             ShowPlaceholder();
         }
-        else
+        else if (isPlaceholderActive && this.Text != placeholderText)
         {
-            HidePlaceholder();
+            isPlaceholderActive = false;
+            this.ForeColor = Color.Black;
         }
-    }
-
-    private void ShowPlaceholder()
-    {
-        this.Text = placeholderText;
-        this.ForeColor = Color.Gray;
-        isPlaceholderActive = true;
-    }
-
-    private void HidePlaceholder()
-    {
-        this.Text = "";
-        this.ForeColor = Color.Black;
-        isPlaceholderActive = false;
     }
 }
